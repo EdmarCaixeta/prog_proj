@@ -40,17 +40,19 @@ função print_list deve ser excluida
         no* ptr, *aux;
         char nome_arq_entrada[100], palavra[100];
         
-        arq_saida = fopen("resultado.out", "wt");
+        arq_saida = fopen("resultado.out", "w");
 
         lista = new_list();
         ptr = lista->cabeca->prox;
         
-        for(int i = 2; i < num_param; i++) 
-        {   
-            strcpy(nome_arq_entrada, argv[i]);
-            printf("I = %d\n", i);
+        printf("ARGC = %d\n", argc);
+        printf("ARGV = %s\n", argv[2]);
+        /*for(int i = 2; i < num_param; i++) 
+        { */  
+            strcpy(nome_arq_entrada, argv[2]);
+            //printf("I = %d\n", i);
             //Tratamento de erros de entrada
-            arq_entrada = fopen(nome_arq_entrada, "rt");
+            arq_entrada = fopen(nome_arq_entrada, "r");
             
             if(arq_entrada == NULL)
             {
@@ -65,29 +67,32 @@ função print_list deve ser excluida
             }
 
             //Manipulação de listas & verificação de arquivos
-            while(fscanf(arq_entrada, "%s", &palavra) != EOF)
+            while(fscanf(arq_entrada, "%s", palavra) != EOF)
             {
-                printf("%s ", palavra); 
+                printf("%s\n", palavra); 
                 
                 //Verificação se já existe palavra na lista
-                aux = search_in_list(lista, ptr->chave);
+                aux = search_in_list(lista, palavra);
                 
                 if(aux == NULL)
                 {
+                    //printf("NULL case\n");
                     strcpy(ptr->chave, tolower_string(palavra));
-                    ptr->ocorrencia[i]++;
+                    //printf("strcpy case\n");
+                    ptr->ocorrencia[0]++;
                 }
                 
                 else
                 {
                     ptr = aux;
-                    ptr->ocorrencia[i]++;    
+                    ptr->ocorrencia[0]++;    
                 }                    
-                ptr = ptr->prox;
+                
+                //ptr = ptr->prox;
             }
         
         fclose(arq_entrada);
-        }
+        //}
         list_len = list_lenght(lista);
         print_list(lista, list_len);
         fclose(arq_saida);
@@ -112,6 +117,7 @@ função print_list deve ser excluida
         while(p != NULL && p->chave != x)
             p = p->prox;
         
+        printf("busca\n");
         return p;
     }
 
@@ -168,4 +174,15 @@ função print_list deve ser excluida
         for(ptr = lista->cabeca->prox; ptr != NULL; ptr = ptr->prox)
             len++;
         return len;
+    }
+
+    void insere_lcc(lcc* l, int y, no* p)
+    {
+        no* novo;
+        
+        novo = (no*) malloc(sizeof(no));
+        
+        novo->chave = y;    
+        novo->prox = p->prox;
+        p->prox = novo; 
     }
