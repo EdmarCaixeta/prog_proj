@@ -1,7 +1,6 @@
 /*TODOLIST:
 Ocorrencia = alocação dinamica
 função print_list deve ser excluida
-eliminar o case-sensitive
 */
 //Inclusão de bibliotecas
     #include <stdio.h>
@@ -29,25 +28,29 @@ eliminar o case-sensitive
     void print_list(lde*, int);
     void print_list_in_file(lde*, int, FILE*);
     char* tolower_string(char []);
+    int list_lenght(lde*);
 
 //Main
     int main(int argc, char* argv[])
     {
         //Definição de Variáveis
         FILE* arq_saida, *arq_entrada;
-        unsigned int num_param = argc - 2;
+        int num_param = argc, list_len;
         lde* lista;
         no* ptr, *aux;
         char nome_arq_entrada[100], palavra[100];
         
-        arq_saida = fopen("resultado.out", "r+");
+        arq_saida = fopen("resultado.out", "wt");
 
-        for(int i = 0; i < num_param; i++) 
-        {    
-            strcpy(nome_arq_entrada, argv[i]);
+        lista = new_list();
+        ptr = lista->cabeca->prox;
         
+        for(int i = 2; i < num_param; i++) 
+        {   
+            strcpy(nome_arq_entrada, argv[i]);
+            printf("I = %d\n", i);
             //Tratamento de erros de entrada
-            arq_entrada = fopen(nome_arq_entrada, "r");
+            arq_entrada = fopen(nome_arq_entrada, "rt");
             
             if(arq_entrada == NULL)
             {
@@ -62,20 +65,16 @@ eliminar o case-sensitive
             }
 
             //Manipulação de listas & verificação de arquivos
-            lista = new_list();
-            ptr = lista->cabeca->prox;
-
-            while(fscanf(arq_entrada, "%s ", palavra) != EOF)
+            while(fscanf(arq_entrada, "%s", &palavra) != EOF)
             {
-                fscanf(arq_entrada, "%s ", palavra);
-                strcpy(ptr->chave, tolower_string(palavra));
+                printf("%s ", palavra); 
                 
                 //Verificação se já existe palavra na lista
                 aux = search_in_list(lista, ptr->chave);
                 
                 if(aux == NULL)
                 {
-                    fscanf(arq_entrada, "%s ", ptr->chave);
+                    strcpy(ptr->chave, tolower_string(palavra));
                     ptr->ocorrencia[i]++;
                 }
                 
@@ -86,12 +85,12 @@ eliminar o case-sensitive
                 }                    
                 ptr = ptr->prox;
             }
-
-        }
         
         fclose(arq_entrada);
+        }
+        list_len = list_lenght(lista);
+        print_list(lista, list_len);
         fclose(arq_saida);
-
     }
 
 //Definição de Funções
@@ -119,13 +118,12 @@ eliminar o case-sensitive
     void print_list(lde* lista, int num_elementos)
     {
         no* ptr;
-        
         if(lista->cabeca->prox == NULL)
             printf("Lista vazia!\n");
 
         for(ptr = lista->cabeca->prox; ptr != NULL; ptr = ptr->prox)
         {
-            printf("%s \n", ptr->chave);
+            printf("%s ", ptr->chave);
             for(int i = 0; i < num_elementos; i++)
             {
                 printf("%d ", ptr->ocorrencia[i]);
@@ -134,7 +132,7 @@ eliminar o case-sensitive
         printf("\n");   
     }
 
-    void print_list_in_file(lde* lista, int num_elementos, FILE* arq_saida)
+    void print_list_in_file(lde* lista, int lista_length, FILE* arq_saida)
     {
         no* ptr;
         
@@ -144,7 +142,7 @@ eliminar o case-sensitive
         for(ptr = lista->cabeca->prox; ptr != NULL; ptr = ptr->prox)
         {
             fprintf(arq_saida, "%s ", ptr->chave);
-            for(int i = 0; i < num_elementos; i++)
+            for(int i = 0; i < lista_length; i++)
             {
                 fprintf(arq_saida, "%d ", ptr->ocorrencia[i]);
             }
@@ -152,13 +150,22 @@ eliminar o case-sensitive
         }
     }
 
-    char* tolower_string(char string[])
+    char* tolower_string(char str[])
     {
         int i = 0;
-        while (string[i]) 
+        while (str[i]) 
         {
-            string[i] = tolower(string[i]);
+            str[i] = tolower(str[i]);
             i++;
         }
-        return string;
+        return str;
+    }
+
+    int list_lenght(lde* lista)
+    {
+        int len = 0;
+        no* ptr;
+        for(ptr = lista->cabeca->prox; ptr != NULL; ptr = ptr->prox)
+            len++;
+        return len;
     }
