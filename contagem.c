@@ -2,11 +2,13 @@
 Ocorrencia = alocação dinamica
 função print_list deve ser excluida
 */
+
 //Inclusão de bibliotecas
     #include <stdio.h>
     #include <stdlib.h>
     #include <string.h>
     #include <ctype.h>
+    #include <locale.h>
 
 //Declaração de novos tipos
     typedef struct lista_duplamente_encadeada
@@ -28,14 +30,17 @@ função print_list deve ser excluida
     void print_list(lde*, int);
     void print_list_in_file(lde*, int, FILE*);
     char* tolower_string(char []);
-    int list_lenght(lde*);
+    void insert_in_list(lde*, char*, no*, int);
+    char* rmv_special_char(char []);
+    void Selection_Sort(lde* lista);
 
 //Main
     int main(int argc, char* argv[])
     {
+        setlocale(LC_ALL, "");
         //Definição de Variáveis
         FILE* arq_saida, *arq_entrada;
-        int num_param = argc, list_len;
+        int num_param = argc - 2, list_len;
         lde* lista;
         no* ptr, *aux;
         char nome_arq_entrada[100], palavra[100];
@@ -45,12 +50,9 @@ função print_list deve ser excluida
         lista = new_list();
         ptr = lista->cabeca->prox;
         
-        printf("ARGC = %d\n", argc);
-        printf("ARGV = %s\n", argv[2]);
-        /*for(int i = 2; i < num_param; i++) 
-        { */  
-            strcpy(nome_arq_entrada, argv[2]);
-            //printf("I = %d\n", i);
+        for(int i = 0; i < num_param; i++) 
+        {   
+            strcpy(nome_arq_entrada, argv[i+2]);
             //Tratamento de erros de entrada
             arq_entrada = fopen(nome_arq_entrada, "r");
             
@@ -67,38 +69,36 @@ função print_list deve ser excluida
             }
 
             //Manipulação de listas & verificação de arquivos
-            while(fscanf(arq_entrada, "%s", palavra) != EOF)
+            while(fscanf(arq_entrada, "%s", &palavra) != EOF)
             {
-                printf("%s\n", palavra); 
-                
+                //Remove pontuação
+                strcpy(palavra, rmv_special_char(palavra));
                 //Verificação se já existe palavra na lista
-                aux = search_in_list(lista, palavra);
                 
+                aux = search_in_list(lista, palavra);
+
                 if(aux == NULL)
                 {
-                    //printf("NULL case\n");
-                    strcpy(ptr->chave, tolower_string(palavra));
-                    //printf("strcpy case\n");
-                    ptr->ocorrencia[0]++;
+                   insert_in_list(lista, palavra, lista->cabeca, i);
+                   Selection_Sort(lista);
                 }
                 
                 else
                 {
                     ptr = aux;
-                    ptr->ocorrencia[0]++;    
+                    ptr->ocorrencia[i]++;    
                 }                    
                 
-                //ptr = ptr->prox;
             }
         
         fclose(arq_entrada);
-        //}
-        list_len = list_lenght(lista);
-        print_list(lista, list_len);
+        }
+        print_list(lista, num_param);
         fclose(arq_saida);
     }
 
 //Definição de Funções
+//->Funções relacionadas a Listas
     lde* new_list()
     {
         lde* lista = (lde*) malloc(sizeof(lde));
@@ -114,10 +114,9 @@ função print_list deve ser excluida
     {
         no* p;
         p = lista->cabeca->prox;
-        while(p != NULL && p->chave != x)
+        while(p != NULL && strcmp(x, p->chave) != 0) 
             p = p->prox;
-        
-        printf("busca\n");
+
         return p;
     }
 
@@ -134,8 +133,8 @@ função print_list deve ser excluida
             {
                 printf("%d ", ptr->ocorrencia[i]);
             }
-        }
         printf("\n");   
+        }
     }
 
     void print_list_in_file(lde* lista, int lista_length, FILE* arq_saida)
@@ -156,6 +155,19 @@ função print_list deve ser excluida
         }
     }
 
+    void insert_in_list(lde* lista, char* chave, no* ptr, int indice)
+    {
+        no* novo;
+        
+        novo = (no*) malloc(sizeof(no));
+        
+        strcpy(novo->chave, tolower_string(chave));
+        novo->ocorrencia[indice]++;    
+        novo->prox = ptr->prox;
+        ptr->prox = novo; 
+    }
+
+//->Funções relacionadas a Strings
     char* tolower_string(char str[])
     {
         int i = 0;
@@ -167,22 +179,35 @@ função print_list deve ser excluida
         return str;
     }
 
-    int list_lenght(lde* lista)
+
+    char* rmv_special_char(char str[])
     {
-        int len = 0;
-        no* ptr;
-        for(ptr = lista->cabeca->prox; ptr != NULL; ptr = ptr->prox)
-            len++;
-        return len;
+        int i = 0;
+        while (str[i]) 
+        {
+            switch (str[i])
+            {
+            case '.':
+            case '!':
+            case '?':
+            case '/':
+            case ',':
+            case '(':
+            case ')':
+            case '{':
+            case '}':
+            case ':':
+            case '[':
+            case ']':    
+                str[i] = '\0';
+                
+            }
+            i++;
+        }
+        return str;
     }
 
-    void insere_lcc(lcc* l, int y, no* p)
+    void search_and_insert(lde* lista, char nova[], char anterior[])
     {
-        no* novo;
         
-        novo = (no*) malloc(sizeof(no));
-        
-        novo->chave = y;    
-        novo->prox = p->prox;
-        p->prox = novo; 
     }
