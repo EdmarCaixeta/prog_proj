@@ -207,7 +207,21 @@ função print_list deve ser excluida
         return str;
     }
 
-    void search_and_insert(lde* lista, char nova[], char anterior[])
+    void search_and_insert(lde* lista, char palavra[], char anterior[])
     {
-        
+        no* p, *q, *novo;
+        novo = (no*) malloc(sizeof(no));
+        strcpy(novo->chave, palavra);
+        p = lista->cabeca;
+        q = lista->cabeca->prox;
+        while(q != NULL && q->chave != q->chave != anterior)
+        {
+            p = q;
+            q = q-> prox;
+        }
+        novo->ant = p;
+        novo->prox = q;
+        p->prox = novo;
+        if(q != NULL)
+            q->ant = novo;
     }
