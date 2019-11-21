@@ -1,20 +1,14 @@
-/*TODOLIST:
-Ocorrencia = alocação dinamica
-função print_list deve ser excluida
-*/
-
 //Inclusão de bibliotecas
     #include <stdio.h>
     #include <stdlib.h>
     #include <string.h>
     #include <ctype.h>
-    #include <locale.h>
 
 //Declaração de novos tipos
     typedef struct lista_duplamente_encadeada
     {
-        char chave[100];
-        int ocorrencia[10];
+        unsigned char chave[100];
+        unsigned int ocorrencia[10];
         struct lista_duplamente_encadeada* ant;
         struct lista_duplamente_encadeada* prox;
     } no;
@@ -26,30 +20,28 @@ função print_list deve ser excluida
 
 //Prototipação de Funções
     lde* new_list();
-    no* search_in_list(lde*, char[]);
-    void print_list(lde*, int);
+    no* search_in_list(lde*, unsigned char[]);
     void print_list_in_file(lde*, int, FILE*);
-    char* tolower_string(char []);
-    void insert_in_list(lde*, char*, no*, int);
-    char* rmv_special_char(char []);
-    void Selection_Sort(lde* lista);
+    unsigned char* tolower_string(unsigned char []);
+    void insert_in_list(lde*, unsigned char*, no*, int, int);
+    unsigned char* rmv_special_char(unsigned char []);
+    void search_and_insert(lde*, unsigned char*);
+    void fix_ocorrencias(lde* , int );
 
 //Main
-    int main(int argc, char* argv[])
+    int main(int argc, unsigned char* argv[])
     {
-        setlocale(LC_ALL, "");
         //Definição de Variáveis
         FILE* arq_saida, *arq_entrada;
         int num_param = argc - 2, list_len;
         lde* lista;
         no* ptr, *aux;
-        char nome_arq_entrada[100], palavra[100];
+        unsigned char nome_arq_entrada[100], palavra[100];
         
         arq_saida = fopen("resultado.out", "w");
 
         lista = new_list();
         ptr = lista->cabeca->prox;
-        
         for(int i = 0; i < num_param; i++) 
         {   
             strcpy(nome_arq_entrada, argv[i+2]);
@@ -79,8 +71,7 @@ função print_list deve ser excluida
 
                 if(aux == NULL)
                 {
-                   insert_in_list(lista, palavra, lista->cabeca, i);
-                   Selection_Sort(lista);
+                    insert_in_list(lista, palavra, lista->cabeca, i, num_param);
                 }
                 
                 else
@@ -93,7 +84,7 @@ função print_list deve ser excluida
         
         fclose(arq_entrada);
         }
-        print_list(lista, num_param);
+        print_list_in_file(lista, num_param, arq_saida);
         fclose(arq_saida);
     }
 
@@ -110,7 +101,7 @@ função print_list deve ser excluida
         return lista;
     }
 
-    no* search_in_list(lde* lista, char x[])
+    no* search_in_list(lde* lista, unsigned char x[])
     {
         no* p;
         p = lista->cabeca->prox;
@@ -155,20 +146,25 @@ função print_list deve ser excluida
         }
     }
 
-    void insert_in_list(lde* lista, char* chave, no* ptr, int indice)
+    void insert_in_list(lde* lista, unsigned char* chave, no* ptr, int indice, int n_arquivos)
     {
         no* novo;
         
         novo = (no*) malloc(sizeof(no));
         
         strcpy(novo->chave, tolower_string(chave));
-        novo->ocorrencia[indice]++;    
+        for(int i = 0; i < n_arquivos; i++)
+        {
+            novo->ocorrencia[i] = 0;
+        }
+        novo->ocorrencia[indice] = 1;    
         novo->prox = ptr->prox;
         ptr->prox = novo; 
+        novo->ant = ptr;
     }
 
 //->Funções relacionadas a Strings
-    char* tolower_string(char str[])
+    unsigned char* tolower_string(unsigned char str[])
     {
         int i = 0;
         while (str[i]) 
@@ -180,7 +176,7 @@ função print_list deve ser excluida
     }
 
 
-    char* rmv_special_char(char str[])
+    unsigned char* rmv_special_char(unsigned char str[])
     {
         int i = 0;
         while (str[i]) 
@@ -205,23 +201,4 @@ função print_list deve ser excluida
             i++;
         }
         return str;
-    }
-
-    void search_and_insert(lde* lista, char palavra[], char anterior[])
-    {
-        no* p, *q, *novo;
-        novo = (no*) malloc(sizeof(no));
-        strcpy(novo->chave, palavra);
-        p = lista->cabeca;
-        q = lista->cabeca->prox;
-        while(q != NULL && q->chave != q->chave != anterior)
-        {
-            p = q;
-            q = q-> prox;
-        }
-        novo->ant = p;
-        novo->prox = q;
-        p->prox = novo;
-        if(q != NULL)
-            q->ant = novo;
     }
